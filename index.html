@@ -1,0 +1,337 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Old Heros</title>
+<meta name="description" content="Um motor aberto de jogo de masmorra de tabuleiro, feito em Godot com ajuda de IA. Crie quests, heróis, monstros e jogos derivados.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fondamento&family=Alegreya+Sans:ital,wght@0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --felt:#24453a; --felt-deep:#1a342b; --felt-line:#33594b;
+  --ink:#f2ede0; --ink-soft:#c9cdbf;
+  --stone:#bdb6a6; --corridor:#8f8a7e; --wall:#3a2e28;
+  --brass:#d8b04a; --brass-deep:#a8862f;
+  --token:#b8322a; --reach:#e9d48a;
+  --code-bg:#15291f;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important;animation:none!important}}
+body{margin:0;background:var(--felt);color:var(--ink);font:400 1.125rem/1.6 "Alegreya Sans",system-ui,sans-serif;
+  background-image:radial-gradient(circle at 20% 0%,#2b5244 0,transparent 55%),radial-gradient(circle at 100% 100%,var(--felt-deep) 0,transparent 60%)}
+a{color:var(--brass)}
+:focus-visible{outline:3px solid var(--brass);outline-offset:3px}
+h1,h2,h3{font-family:Fondamento,Georgia,serif;font-weight:400;line-height:1.15;margin:0}
+h1{font-size:clamp(2.4rem,5.2vw,4rem)}
+h2{font-size:clamp(1.8rem,3.4vw,2.5rem);margin-bottom:.6em}
+h3{font-size:1.35rem;margin-bottom:.3em}
+p{margin:0 0 1em;max-width:62ch}
+.wrap{max-width:1120px;margin:0 auto;padding:0 16px}
+@media(min-width:720px){.wrap{padding:0 32px}}
+
+header.top{display:flex;justify-content:space-between;align-items:center;padding:20px 0}
+.brand{font-family:Fondamento,serif;font-size:1.4rem;color:var(--ink);text-decoration:none}
+.top nav a{color:var(--ink-soft);text-decoration:none;margin-left:20px}
+.top nav a:hover{color:var(--ink)}
+@media(max-width:560px){.top nav .hide-sm{display:none}}
+
+.btn{display:inline-block;font:700 1.05rem "Alegreya Sans",sans-serif;padding:.75em 1.3em;border-radius:6px;text-decoration:none;cursor:pointer;border:2px solid var(--brass)}
+.btn-main{background:var(--brass);color:#1d1a10;box-shadow:0 3px 0 var(--brass-deep)}
+.btn-main:hover{background:#e3bf5d}
+.btn-main:active{transform:translateY(2px);box-shadow:0 1px 0 var(--brass-deep)}
+.btn-ghost{color:var(--ink);background:transparent}
+.btn-ghost:hover{background:rgba(216,176,74,.12)}
+
+/* hero */
+.hero{display:grid;gap:40px;padding:32px 0 72px;align-items:center}
+@media(min-width:900px){.hero{grid-template-columns:1fr 1.05fr;gap:56px;padding:56px 0 96px}}
+.hero>*,.engine>*,.cols>*{min-width:0}
+.hero p.lead{font-size:1.25rem;color:var(--ink-soft);margin-top:1em}
+.ctas{display:flex;flex-wrap:wrap;gap:12px;margin-top:1.6em}
+
+.table-board{background:#4a3a2c;padding:14px;border-radius:10px;box-shadow:0 18px 40px rgba(0,0,0,.35),inset 0 0 0 2px #5d4a38}
+.board{display:grid;grid-template-columns:repeat(13,1fr);aspect-ratio:13/9;background:var(--wall);gap:0;border:3px solid var(--wall)}
+.cell{position:relative;background:var(--corridor);border:0 solid var(--wall);padding:0;margin:0;font:inherit;color:inherit}
+.cell.room{background:var(--stone)}
+.cell.wt{border-top-width:3px}.cell.wb{border-bottom-width:3px}.cell.wl{border-left-width:3px}.cell.wr{border-right-width:3px}
+.cell::after{content:"";position:absolute;inset:0;border:1px solid rgba(58,46,40,.22);pointer-events:none}
+.cell.door{box-shadow:inset 0 0 0 2px #7a4b26}
+.cell.reach{background:var(--reach);cursor:pointer}
+.cell.reach:hover{background:#f6e3a0}
+.cell .tok{position:absolute;inset:16%;border-radius:50%;background:var(--token);box-shadow:0 3px 0 #7c1f19,inset 0 -4px 0 rgba(0,0,0,.18);transition:transform .15s}
+.cell .mon{position:absolute;inset:20%;background:#2f4b5c;clip-path:polygon(50% 0,100% 100%,0 100%)}
+.cell .chest{position:absolute;inset:26% 18%;background:#7a4b26;border-radius:2px;box-shadow:inset 0 -3px 0 #4f2f17}
+.board-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:12px;flex-wrap:wrap}
+.dice{display:flex;gap:8px}
+.die{width:40px;height:40px;border-radius:7px;background:var(--ink);color:#1d1a10;display:grid;place-items:center;font:700 1.25rem "Alegreya Sans";box-shadow:0 3px 0 #a9a491}
+.die.roll{animation:shake .35s}
+@keyframes shake{25%{transform:rotate(-14deg)}75%{transform:rotate(12deg)}}
+.board-msg{font-size:.98rem;color:#efe6cf;margin:0;flex:1 1 180px}
+.roll-btn{font-size:.95rem;padding:.55em 1em}
+
+/* sections */
+section.block{padding:72px 0;border-top:1px solid var(--felt-line)}
+.cols{display:grid;gap:32px}
+@media(min-width:820px){.cols{grid-template-columns:repeat(2,1fr);gap:40px 56px}}
+.ways{display:grid;gap:28px;margin-top:8px}
+@media(min-width:720px){.ways{grid-template-columns:repeat(2,1fr);gap:36px 56px}}
+.ways p{color:var(--ink-soft);margin:0}
+.ways .tool{display:block;color:var(--brass);font-size:.95rem;margin-top:.4em}
+
+.engine{display:grid;gap:40px;align-items:start}
+@media(min-width:900px){.engine{grid-template-columns:1fr 1fr}}
+.engine dl{margin:0}
+.engine dt{font-family:Fondamento,serif;font-size:1.25rem;margin-top:1.1em}
+.engine dt:first-child{margin-top:0}
+.engine dd{margin:.2em 0 0;color:var(--ink-soft);max-width:56ch}
+pre{background:var(--code-bg);border:1px solid var(--felt-line);border-radius:8px;padding:18px 20px;overflow-x:auto;font:400 .9rem/1.55 ui-monospace,SFMono-Regular,Menlo,monospace;color:#dfe6d6;margin:0}
+pre .k{color:var(--brass)} pre .s{color:#a9d4a1} pre .c{color:#7f9a8a}
+figcaption{font-size:.95rem;color:var(--ink-soft);margin-top:10px}
+
+.road{list-style:none;padding:0;margin:0;display:grid;gap:0;counter-reset:f}
+.road li{display:grid;grid-template-columns:44px 1fr;gap:14px;padding:14px 0;border-bottom:1px solid var(--felt-line);counter-increment:f}
+.road li::before{content:counter(f);width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-weight:700;background:var(--ink);color:#1d1a10}
+.road li.todo::before{background:transparent;color:var(--ink-soft);border:2px dashed var(--ink-soft)}
+.road strong{font-weight:700}
+.road span{color:var(--ink-soft)}
+.road li.todo strong{color:var(--brass)}
+
+.join{text-align:left;padding:88px 0}
+.join .box{background:var(--ink);color:#22201a;border-radius:12px;padding:40px 28px;display:grid;gap:24px;box-shadow:0 18px 40px rgba(0,0,0,.3)}
+@media(min-width:820px){.join .box{grid-template-columns:1.4fr 1fr;align-items:center;padding:48px 56px}}
+.join h2{color:#22201a}
+.join p{color:#4b483c}
+.join .btn-ghost{color:#22201a;border-color:#22201a}
+.join .btn-ghost:hover{background:rgba(0,0,0,.06)}
+footer{padding:32px 0 48px;color:var(--ink-soft);font-size:.95rem;border-top:1px solid var(--felt-line)}
+footer p{max-width:80ch}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="#">Old Heros</a>
+    <nav aria-label="Seções">
+      <a class="hide-sm" href="#participar">Participar</a>
+      <a class="hide-sm" href="#motor">O motor</a>
+      <a href="#entrar">Entrar no projeto</a>
+    </nav>
+  </header>
+
+  <main>
+  <section class="hero">
+    <div>
+      <h1><span class="game-name">Old Heros</span>: um jogo de tabuleiro aberto para você remixar</h1>
+      <p class="lead">Um dungeon crawl de heróis, salas escuras e dados, feito em Godot com ajuda de IA. As regras já funcionam. Agora queremos gente para criar quests, heróis, monstros e jogos inteiros derivados dele.</p>
+      <div class="ctas">
+        <a class="btn btn-main js-join" href="#">Quero contribuir</a>
+        <a class="btn btn-ghost" href="#motor">Ver o que já existe</a>
+      </div>
+    </div>
+
+    <figure style="margin:0">
+      <div class="table-board">
+        <div class="board" id="board" role="grid" aria-label="Tabuleiro de exemplo"></div>
+        <div class="board-bar">
+          <div class="dice" aria-hidden="true"><div class="die" id="d1">?</div><div class="die" id="d2">?</div></div>
+          <p class="board-msg" id="msg" aria-live="polite">Role os dados para mover o herói.</p>
+          <button class="btn btn-main roll-btn" id="roll" type="button">Rolar dados</button>
+        </div>
+      </div>
+      <figcaption>Experimente: as paredes ficam entre as casas, e o herói só passa pelas portas, como no jogo.</figcaption>
+    </figure>
+  </section>
+
+  <section class="block" id="participar">
+    <h2>Como você pode participar</h2>
+    <p>Não precisa saber programar para tudo. Escolha por onde começar.</p>
+    <div class="ways">
+      <div>
+        <h3>Escrever quests</h3>
+        <p>Monte mapas, monstros, armadilhas e a história de cada aventura. Uma quest é um arquivo de texto simples.</p>
+        <span class="tool">JSON, sem programar</span>
+      </div>
+      <div>
+        <h3>Criar heróis e monstros</h3>
+        <p>Desenhe personagens, cartas e miniaturas 3D próprias, à mão ou com IA, para dar ao jogo uma cara original.</p>
+        <span class="tool">Blender, ilustração, IA generativa</span>
+      </div>
+      <div>
+        <h3>Mexer nas regras</h3>
+        <p>Novos feitiços, itens, tipos de objetivo e uma IA de mestre mais esperta. Cada regra tem teste automático.</p>
+        <span class="tool">GDScript no Godot 4</span>
+      </div>
+      <div>
+        <h3>Fazer um jogo derivado</h3>
+        <p>Pegue o motor e troque o tema: ficção científica, faroeste, terror, o que quiser. As regras e o online vêm prontos.</p>
+        <span class="tool">Fork do projeto</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="motor">
+    <h2>Por que é fácil derivar</h2>
+    <div class="engine">
+      <dl>
+        <dt>Regras separadas do visual</dt>
+        <dd>O motor de regras não sabe que existe 3D. Dá para trocar toda a arte, ou até fazer uma versão 2D, sem tocar numa regra.</dd>
+        <dt>Tudo é dado</dt>
+        <dd>Heróis, monstros, armas, feitiços, cartas e quests ficam em arquivos JSON. Um jogo novo começa trocando arquivos, não código.</dd>
+        <dt>Uma partida é uma lista de jogadas</dt>
+        <dd>Semente dos dados mais os comandos dos jogadores reconstroem a partida inteira. Isso dá save no meio da quest, replay e multiplayer online de graça.</dd>
+      </dl>
+      <figure style="margin:0">
+<pre><span class="c">// data/quests/cripta_do_relojoeiro.json</span>
+{
+  <span class="k">"id"</span>: <span class="s">"cripta_do_relojoeiro"</span>,
+  <span class="k">"name"</span>: <span class="s">"A Cripta do Relojoeiro"</span>,
+  <span class="k">"start"</span>: [[1, 13]],
+  <span class="k">"objective"</span>: { <span class="k">"type"</span>: <span class="s">"find"</span> },
+  <span class="k">"objects"</span>: [
+    { <span class="k">"type"</span>: <span class="s">"door"</span>, <span class="k">"a"</span>: [4, 2], <span class="k">"b"</span>: [4, 3] },
+    { <span class="k">"type"</span>: <span class="s">"monster"</span>, <span class="k">"id"</span>: <span class="s">"skeleton"</span>, <span class="k">"pos"</span>: [5, 6] },
+    { <span class="k">"type"</span>: <span class="s">"trap"</span>, <span class="k">"id"</span>: <span class="s">"pit"</span>, <span class="k">"pos"</span>: [10, 1], <span class="k">"hidden"</span>: true }
+  ],
+  <span class="k">"wandering_monster"</span>: <span class="s">"skeleton"</span>
+}</pre>
+        <figcaption>Uma quest inteira cabe num arquivo assim.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="block">
+    <h2>O que já está pronto</h2>
+    <ol class="road">
+      <li><div><strong>Motor de regras com testes.</strong> <span>Tabuleiro, movimento, linha de visão, dados, combate e turnos.</span></div></li>
+      <li><div><strong>Tabuleiro 3D jogável.</strong> <span>Portas, câmera, clicar para mover, atacar e abrir.</span></div></li>
+      <li><div><strong>Combate e mestre por IA.</strong> <span>Monstros que percebem, perseguem e atacam; dados 3D.</span></div></li>
+      <li><div><strong>Exploração.</strong> <span>Névoa de guerra, busca de tesouros, armadilhas e portas secretas.</span></div></li>
+      <li><div><strong>Magia.</strong> <span>Escolas de feitiços para heróis e magos inimigos.</span></div></li>
+      <li><div><strong>Quests e campanha.</strong> <span>Objetivos, vitória e derrota, armeria, ouro e save entre aventuras.</span></div></li>
+      <li><div><strong>Jogo online.</strong> <span>Salas com senha e servidor próprio para jogar com amigos.</span></div></li>
+      <li class="todo"><div><strong>Conteúdo original e código aberto.</strong> <span>Heróis, monstros, arte e quests próprios, e o repositório público. É aqui que você entra.</span></div></li>
+    </ol>
+  </section>
+
+  <section class="join" id="entrar">
+    <div class="box">
+      <div>
+        <h2>Entre no projeto</h2>
+        <p>O código abre em breve. Deixe seu nome agora, conte o que gostaria de fazer, e você recebe o aviso quando o repositório for publicado.</p>
+      </div>
+      <div class="ctas" style="margin-top:0">
+        <a class="btn btn-main js-join" href="#">Quero contribuir</a>
+        <a class="btn btn-ghost" href="https://github.com/MarioTrazzi/old-heros">Acompanhar no GitHub</a>
+      </div>
+    </div>
+  </section>
+  </main>
+
+  <footer>
+    <p>Old Heros é um projeto independente de Mario Trazzi. Não tem vínculo com nenhuma editora de jogos. As regras de jogo não são protegidas por direito autoral; nomes, arte e quests daqui são originais.</p>
+  </footer>
+</div>
+
+<script>
+// Link "Quero contribuir": abre uma issue no GitHub com um modelo.
+(function(){
+  var body = "**O que eu gostaria de fazer:** (quests, arte, regras, jogo derivado, outra coisa)\n\n**Minha experiência:** \n\n**Como prefere ser avisado:** ";
+  var url = "https://github.com/MarioTrazzi/old-heros/issues/new?labels=quero-contribuir&title=" +
+    encodeURIComponent("Quero contribuir") + "&body=" + encodeURIComponent(body);
+  document.querySelectorAll(".js-join").forEach(function(a){ a.href = url; a.target = "_blank"; a.rel = "noopener"; });
+})();
+
+// Mini tabuleiro: zonas (0 = corredor, letras = salas), paredes nas arestas entre zonas diferentes.
+(function(){
+  var W = 13, H = 9;
+  var map = [
+    "0000000000000",
+    "0AAA0BBBB0CC0",
+    "0AAA0BBBB0CC0",
+    "0AAA0BBBB0CC0",
+    "0000000000000",
+    "0DDDD0EEE0FF0",
+    "0DDDD0EEE0FF0",
+    "0DDDD0EEE0FF0",
+    "0000000000000"
+  ];
+  // portas: pares de casas vizinhas [x,y,x2,y2]
+  var doors = [[2,3,2,4],[6,3,6,4],[9,2,10,2],[3,5,3,4],[7,5,7,4],[11,5,11,4]];
+  var monsters = [[7,2],[2,6],[11,6]];
+  var chest = [[11,1]];
+  var hero = [0,8];
+  var reach = {};
+  var board = document.getElementById("board");
+  var msg = document.getElementById("msg");
+  function z(x,y){ return map[y][x]; }
+  function key(x,y){ return x+","+y; }
+  function isDoor(a,b,c,d){
+    return doors.some(function(o){ return (o[0]==a&&o[1]==b&&o[2]==c&&o[3]==d)||(o[0]==c&&o[1]==d&&o[2]==a&&o[3]==b); });
+  }
+  function wall(a,b,c,d){ return z(a,b)!==z(c,d) && !isDoor(a,b,c,d); }
+  function has(list,x,y){ return list.some(function(p){ return p[0]==x&&p[1]==y; }); }
+  function bfs(steps){
+    var seen = {}; seen[key(hero[0],hero[1])] = 0;
+    var q = [hero.slice()], out = {};
+    while(q.length){
+      var p = q.shift(), d = seen[key(p[0],p[1])];
+      if(d === steps) continue;
+      [[1,0],[-1,0],[0,1],[0,-1]].forEach(function(v){
+        var nx = p[0]+v[0], ny = p[1]+v[1];
+        if(nx<0||ny<0||nx>=W||ny>=H) return;
+        if(seen[key(nx,ny)] !== undefined) return;
+        if(wall(p[0],p[1],nx,ny)) return;
+        if(has(monsters,nx,ny)||has(chest,nx,ny)) return;
+        seen[key(nx,ny)] = d+1; out[key(nx,ny)] = true; q.push([nx,ny]);
+      });
+    }
+    return out;
+  }
+  function draw(){
+    board.innerHTML = "";
+    for(var y=0;y<H;y++) for(var x=0;x<W;x++){
+      var c = document.createElement(reach[key(x,y)] ? "button" : "div");
+      c.className = "cell" + (z(x,y)!=="0" ? " room" : "");
+      if(y>0 && wall(x,y,x,y-1)) c.className += " wt";
+      if(y<H-1 && wall(x,y,x,y+1)) c.className += " wb";
+      if(x>0 && wall(x,y,x-1,y)) c.className += " wl";
+      if(x<W-1 && wall(x,y,x+1,y)) c.className += " wr";
+      if(reach[key(x,y)]){
+        c.className += " reach"; c.type = "button";
+        c.setAttribute("aria-label","Mover para coluna "+(x+1)+", linha "+(y+1));
+        (function(x,y){ c.addEventListener("click", function(){ move(x,y); }); })(x,y);
+      }
+      c.setAttribute("role","gridcell");
+      if(x===hero[0]&&y===hero[1]){ var t=document.createElement("span"); t.className="tok"; c.appendChild(t); c.setAttribute("aria-label","Herói"); }
+      if(has(monsters,x,y)){ var m=document.createElement("span"); m.className="mon"; c.appendChild(m); c.setAttribute("aria-label","Monstro"); }
+      if(has(chest,x,y)){ var b=document.createElement("span"); b.className="chest"; c.appendChild(b); c.setAttribute("aria-label","Baú"); }
+      board.appendChild(c);
+    }
+  }
+  function move(x,y){
+    hero = [x,y]; reach = {}; draw();
+    var near = [[1,0],[-1,0],[0,1],[0,-1]].some(function(v){
+      var nx=x+v[0], ny=y+v[1];
+      return has(monsters,nx,ny) && !wall(x,y,nx,ny);
+    });
+    msg.textContent = near ? "Um monstro ao lado! No jogo, agora você atacaria." : "Pronto. Role de novo para continuar explorando.";
+    document.getElementById("roll").focus();
+  }
+  document.getElementById("roll").addEventListener("click", function(){
+    var a = 1+Math.floor(Math.random()*6), b = 1+Math.floor(Math.random()*6);
+    ["d1","d2"].forEach(function(id,i){
+      var el = document.getElementById(id);
+      el.textContent = i ? b : a; el.classList.remove("roll"); void el.offsetWidth; el.classList.add("roll");
+    });
+    reach = bfs(a+b); draw();
+    msg.textContent = "Você tirou " + (a+b) + ". Clique numa casa clara para mover.";
+    var first = board.querySelector("button.cell"); if(first) first.focus({preventScroll:true});
+  });
+  draw();
+})();
+</script>
+</body>
+</html>
