@@ -117,7 +117,7 @@ footer p{max-width:80ch}
     <nav aria-label="Seções">
       <a class="hide-sm" href="#participar">Participar</a>
       <a class="hide-sm" href="#motor">O motor</a>
-      <a href="#entrar">Entrar no projeto</a>
+      <a href="https://github.com/MarioTrazzi/heros-quest-simulator">GitHub</a>
     </nav>
   </header>
 
@@ -128,7 +128,7 @@ footer p{max-width:80ch}
       <p class="lead">Um dungeon crawl de heróis, salas escuras e dados, feito em Godot com ajuda de IA. As regras já funcionam. Agora queremos gente para criar quests, heróis, monstros e jogos inteiros derivados dele.</p>
       <div class="ctas">
         <a class="btn btn-main js-join" href="#">Quero contribuir</a>
-        <a class="btn btn-ghost" href="#motor">Ver o que já existe</a>
+        <a class="btn btn-ghost" href="https://github.com/MarioTrazzi/heros-quest-simulator">Ver o código</a>
       </div>
     </div>
 
@@ -167,7 +167,7 @@ footer p{max-width:80ch}
       <div>
         <h3>Fazer um jogo derivado</h3>
         <p>Pegue o motor e troque o tema: ficção científica, faroeste, terror, o que quiser. As regras e o online vêm prontos.</p>
-        <span class="tool">Fork do projeto</span>
+        <span class="tool"><a href="https://github.com/MarioTrazzi/heros-quest-simulator/fork">Fork do projeto</a></span>
       </div>
     </div>
   </section>
@@ -212,7 +212,8 @@ footer p{max-width:80ch}
       <li><div><strong>Magia.</strong> <span>Escolas de feitiços para heróis e magos inimigos.</span></div></li>
       <li><div><strong>Quests e campanha.</strong> <span>Objetivos, vitória e derrota, armeria, ouro e save entre aventuras.</span></div></li>
       <li><div><strong>Jogo online.</strong> <span>Salas com senha e servidor próprio para jogar com amigos.</span></div></li>
-      <li class="todo"><div><strong>Conteúdo original e código aberto.</strong> <span>Heróis, monstros, arte e quests próprios, e o repositório público. É aqui que você entra.</span></div></li>
+      <li><div><strong>Código aberto.</strong> <span>O repositório está público no GitHub.</span></div></li>
+      <li class="todo"><div><strong>Conteúdo original.</strong> <span>Heróis, monstros, arte e quests próprios para o jogo ter identidade. É aqui que você entra.</span></div></li>
     </ol>
   </section>
 
@@ -220,18 +221,18 @@ footer p{max-width:80ch}
     <div class="box">
       <div>
         <h2>Entre no projeto</h2>
-        <p>O código abre em breve. Deixe seu nome agora, conte o que gostaria de fazer, e você recebe o aviso quando o repositório for publicado.</p>
+        <p>O código já está aberto no GitHub. Clone, rode no Godot 4.7 e conte numa issue o que você gostaria de fazer: a gente combina por onde começar.</p>
       </div>
       <div class="ctas" style="margin-top:0">
         <a class="btn btn-main js-join" href="#">Quero contribuir</a>
-        <a class="btn btn-ghost" href="https://github.com/MarioTrazzi/old-heros">Acompanhar no GitHub</a>
+        <a class="btn btn-ghost" href="https://github.com/MarioTrazzi/heros-quest-simulator">Ver o código no GitHub</a>
       </div>
     </div>
   </section>
   </main>
 
   <footer>
-    <p>Old Heros é um projeto independente de Mario Trazzi. Não tem vínculo com nenhuma editora de jogos. As regras de jogo não são protegidas por direito autoral; nomes, arte e quests daqui são originais.</p>
+    <p>Old Heros é um projeto independente de Mario Trazzi. Não tem vínculo com nenhuma editora de jogos. As regras de jogo não são protegidas por direito autoral.</p>
   </footer>
 </div>
 
@@ -239,7 +240,7 @@ footer p{max-width:80ch}
 // Link "Quero contribuir": abre uma issue no GitHub com um modelo.
 (function(){
   var body = "**O que eu gostaria de fazer:** (quests, arte, regras, jogo derivado, outra coisa)\n\n**Minha experiência:** \n\n**Como prefere ser avisado:** ";
-  var url = "https://github.com/MarioTrazzi/old-heros/issues/new?labels=quero-contribuir&title=" +
+  var url = "https://github.com/MarioTrazzi/heros-quest-simulator/issues/new?labels=quero-contribuir&title=" +
     encodeURIComponent("Quero contribuir") + "&body=" + encodeURIComponent(body);
   document.querySelectorAll(".js-join").forEach(function(a){ a.href = url; a.target = "_blank"; a.rel = "noopener"; });
 })();

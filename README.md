@@ -4,6 +4,6 @@ Um jogo de masmorra de tabuleiro aberto para remixar: heróis, salas escuras e d
 
 Esta é a landing page do projeto: <https://mariotrazzi.github.io/old-heros/>
 
-O código do jogo será publicado aqui em breve. Quer criar quests, heróis, monstros, regras ou um jogo derivado? [Abra uma issue contando o que gostaria de fazer](https://github.com/MarioTrazzi/old-heros/issues/new?title=Quero%20contribuir).
+O código do jogo está em <https://github.com/MarioTrazzi/heros-quest-simulator>. Quer criar quests, heróis, monstros, regras ou um jogo derivado? [Abra uma issue lá](https://github.com/MarioTrazzi/heros-quest-simulator/issues/new?title=Quero%20contribuir) contando o que gostaria de fazer.
 
-Projeto independente, sem vínculo com nenhuma editora de jogos. Nomes, arte e quests são originais.
+Projeto independente, sem vínculo com nenhuma editora de jogos.
