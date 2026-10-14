@@ -1,345 +1,394 @@
 <!doctype html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-lang="pt">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Old Heros</title>
-<meta name="description" content="Um motor aberto de jogo de masmorra de tabuleiro, feito em Godot com ajuda de IA. Crie quests, heróis, monstros e jogos derivados.">
+<title>Old Heros — jogo de masmorra aberto</title>
+<meta name="description" content="Old Heros: um jogo de masmorra aberto em 3D, feito em Godot, para jogar, remixar e expandir. / An open-source 3D dungeon game made in Godot.">
+<meta property="og:title" content="Old Heros">
+<meta property="og:description" content="Um jogo de masmorra aberto para você jogar, remixar e expandir. / An open dungeon game for you to play, remix and expand.">
+<meta property="og:image" content="img/partida.jpg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fondamento&family=Alegreya+Sans:ital,wght@0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;0,700;1,400;1,600&amp;family=Fondamento:ital@0;1&amp;display=swap" rel="stylesheet">
 <style>
-:root{
-  --felt:#24453a; --felt-deep:#1a342b; --felt-line:#33594b;
-  --ink:#f2ede0; --ink-soft:#c9cdbf;
-  --stone:#bdb6a6; --corridor:#8f8a7e; --wall:#3a2e28;
-  --brass:#d8b04a; --brass-deep:#a8862f;
-  --token:#b8322a; --reach:#e9d48a;
-  --code-bg:#15291f;
-}
-*{box-sizing:border-box}
+body{margin:0;background:#0c0a08}
+a{color:#e9c97a}a:hover{color:#f6deA0}
+.stone{background-color:#110e0b;background-image:
+ repeating-linear-gradient(0deg, rgba(0,0,0,.55) 0 2px, transparent 2px 64px),
+ repeating-linear-gradient(90deg, rgba(0,0,0,.35) 0 2px, transparent 2px 128px),
+ repeating-linear-gradient(90deg, rgba(255,255,255,.012) 0 1px, transparent 1px 9px),
+ radial-gradient(ellipse at 30% 20%, #1c1712, #0c0a08 70%)}
+.card{position:relative;color:#2a1c10;background:radial-gradient(ellipse at 50% 42%, #f0e4c4 0%, #e8d9b5 42%, #d9c08c 76%, #a67b43 100%);
+ border-radius:7px 12px 8px 14px / 12px 7px 14px 8px;
+ box-shadow: inset 0 0 0 1px rgba(70,40,12,.55), inset 0 0 30px rgba(118,66,22,.55), inset 0 0 7px rgba(45,22,6,.85), 0 22px 44px rgba(0,0,0,.65), 0 2px 0 rgba(0,0,0,.4)}
+.card::before{content:"";position:absolute;inset:10px;border:2px solid #a8823c;border-radius:4px;box-shadow:inset 0 0 0 3px rgba(232,217,181,.5), inset 0 0 0 4px rgba(122,90,34,.55);pointer-events:none}
+.gravura{background-color:#efe4c6;background-image:repeating-linear-gradient(135deg, rgba(42,28,16,.11) 0 1px, transparent 1px 5px);border:2px solid #2a1c10;box-shadow:0 0 0 3px #e8d9b5, 0 0 0 4px #7a5a22}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:52px;padding:10px 26px;box-sizing:border-box;
+ font-family:"Fondamento", "Crimson Text", Georgia, serif;font-style:italic;font-size:22px;line-height:1.1;text-decoration:none;color:#2a1c10;
+ background:linear-gradient(180deg, #f1e4c3, #dcc596);border:2px solid #8a6a2e;border-radius:6px;
+ box-shadow: inset 0 0 0 2px rgba(255,248,225,.55), inset 0 -6px 12px rgba(120,80,30,.35), 0 6px 14px rgba(0,0,0,.55);transition:transform .15s ease, filter .15s ease}
+.btn:hover{color:#1a0f06;filter:brightness(1.07);transform:translateY(-2px)}
+.btn:focus-visible{outline:3px solid #e9c97a;outline-offset:3px}
+.btn-dark{color:#ecdcb4;background:linear-gradient(180deg, #4f3320, #2e1d10);border-color:#a8823c;box-shadow: inset 0 0 0 2px rgba(232,217,181,.12), 0 6px 14px rgba(0,0,0,.55)}
+.btn-dark:hover{color:#fff1cc}
+.navlink{color:#d8c79e;text-decoration:none;font-size:19px;padding:10px 4px;min-height:44px;display:inline-flex;align-items:center}
+.navlink:hover{color:#f3dc9c}
+.langsw{display:inline-flex;padding:3px;gap:2px;border:1.5px solid #a8823c;border-radius:999px;background:rgba(20,14,9,.7)}
+.langbtn{min-width:52px;min-height:44px;padding:0 14px;border:0;border-radius:999px;background:transparent;cursor:pointer;
+ font-family:"Fondamento", "Crimson Text", Georgia, serif;font-size:18px;letter-spacing:1px;color:#d8c79e;transition:background .15s ease, color .15s ease}
+.langbtn:hover{color:#f3dc9c}
+.langbtn:focus-visible{outline:3px solid #e9c97a;outline-offset:2px}
+.langbtn.on{color:#2a1c10;background:linear-gradient(180deg, #f1e4c3, #d6bc84)}
+.die{width:76px;height:76px;border-radius:15px;box-sizing:border-box;padding:12px;display:grid;grid-template-columns:repeat(3, minmax(0, 1fr));gap:4px;
+ background:radial-gradient(circle at 30% 25%, #e0464d, #b3202a 55%, #6e0f17);box-shadow: inset 0 -5px 8px rgba(0,0,0,.45), inset 0 3px 4px rgba(255,160,150,.35), 0 10px 18px rgba(0,0,0,.7)}
+.pip{border-radius:50%;background:radial-gradient(circle at 40% 35%, #fffaf0, #e9dcc4);box-shadow:inset 0 1px 2px rgba(0,0,0,.4)}
+.pip.off{visibility:hidden}
+.dicebtn{display:flex;gap:18px;align-items:center;background:none;border:0;padding:6px;cursor:pointer}
+.dicebtn:focus-visible{outline:3px solid #e9c97a;outline-offset:6px;border-radius:12px}
+.rollA .d1{animation:rollA1 1.15s cubic-bezier(.2,.75,.25,1) both}
+.rollA .d2{animation:rollA2 1.3s cubic-bezier(.2,.75,.25,1) both}
+.rollB .d1{animation:rollB1 1.15s cubic-bezier(.2,.75,.25,1) both}
+.rollB .d2{animation:rollB2 1.3s cubic-bezier(.2,.75,.25,1) both}
+@keyframes rollA1{0%{transform:translate(-220px,-90px) rotate(-620deg) scale(.8)}55%{transform:translate(14px,6px) rotate(18deg)}75%{transform:translate(-4px,0) rotate(-8deg)}100%{transform:none}}
+@keyframes rollA2{0%{transform:translate(-260px,-40px) rotate(700deg) scale(.8)}55%{transform:translate(10px,-4px) rotate(-22deg)}78%{transform:translate(-3px,0) rotate(6deg)}100%{transform:rotate(9deg)}}
+@keyframes rollB1{0%{transform:translate(-220px,-90px) rotate(-620deg) scale(.8)}55%{transform:translate(14px,6px) rotate(18deg)}75%{transform:translate(-4px,0) rotate(-8deg)}100%{transform:none}}
+@keyframes rollB2{0%{transform:translate(-260px,-40px) rotate(700deg) scale(.8)}55%{transform:translate(10px,-4px) rotate(-22deg)}78%{transform:translate(-3px,0) rotate(6deg)}100%{transform:rotate(9deg)}}
+@media (prefers-reduced-motion: reduce){.rollA .d1,.rollA .d2,.rollB .d1,.rollB .d2{animation:none}}
+.feat{transition:transform .25s ease}
+.feat:hover{transform:rotate(0deg) translateY(-6px) !important}
+.ico{width:56px;height:56px;flex:none}
+.ico path,.ico circle,.ill path,.ill circle,.ill rect,.ill ellipse{fill:none;stroke:#2a1c10;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.ill .fill{fill:#2a1c10;stroke:none}
+.ico .fill{fill:#2a1c10;stroke:none}
+code,pre{font-family:"Courier Prime", ui-monospace, Menlo, Consolas, monospace}
+@media (max-width: 700px){.tilt{transform:none !important}.die{width:62px;height:62px;padding:10px}}
 html{scroll-behavior:smooth}
-@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important;animation:none!important}}
-body{margin:0;background:var(--felt);color:var(--ink);font:400 1.125rem/1.6 "Alegreya Sans",system-ui,sans-serif;
-  background-image:radial-gradient(circle at 20% 0%,#2b5244 0,transparent 55%),radial-gradient(circle at 100% 100%,var(--felt-deep) 0,transparent 60%)}
-a{color:var(--brass)}
-:focus-visible{outline:3px solid var(--brass);outline-offset:3px}
-h1,h2,h3{font-family:Fondamento,Georgia,serif;font-weight:400;line-height:1.15;margin:0}
-h1{font-size:clamp(2.4rem,5.2vw,4rem)}
-h2{font-size:clamp(1.8rem,3.4vw,2.5rem);margin-bottom:.6em}
-h3{font-size:1.35rem;margin-bottom:.3em}
-p{margin:0 0 1em;max-width:62ch}
-.wrap{max-width:1120px;margin:0 auto;padding:0 16px}
-@media(min-width:720px){.wrap{padding:0 32px}}
-
-header.top{display:flex;justify-content:space-between;align-items:center;padding:20px 0}
-.brand{font-family:Fondamento,serif;font-size:1.4rem;color:var(--ink);text-decoration:none}
-.top nav a{color:var(--ink-soft);text-decoration:none;margin-left:20px}
-.top nav a:hover{color:var(--ink)}
-@media(max-width:560px){.top nav .hide-sm{display:none}}
-
-.btn{display:inline-block;font:700 1.05rem "Alegreya Sans",sans-serif;padding:.75em 1.3em;border-radius:6px;text-decoration:none;cursor:pointer;border:2px solid var(--brass)}
-.btn-main{background:var(--brass);color:#1d1a10;box-shadow:0 3px 0 var(--brass-deep)}
-.btn-main:hover{background:#e3bf5d}
-.btn-main:active{transform:translateY(2px);box-shadow:0 1px 0 var(--brass-deep)}
-.btn-ghost{color:var(--ink);background:transparent}
-.btn-ghost:hover{background:rgba(216,176,74,.12)}
-
-/* hero */
-.hero{display:grid;gap:40px;padding:32px 0 72px;align-items:center}
-@media(min-width:900px){.hero{grid-template-columns:1fr 1.05fr;gap:56px;padding:56px 0 96px}}
-.hero>*,.engine>*,.cols>*{min-width:0}
-.hero p.lead{font-size:1.25rem;color:var(--ink-soft);margin-top:1em}
-.ctas{display:flex;flex-wrap:wrap;gap:12px;margin-top:1.6em}
-
-.table-board{background:#4a3a2c;padding:14px;border-radius:10px;box-shadow:0 18px 40px rgba(0,0,0,.35),inset 0 0 0 2px #5d4a38}
-.board{display:grid;grid-template-columns:repeat(13,1fr);aspect-ratio:13/9;background:var(--wall);gap:0;border:3px solid var(--wall)}
-.cell{position:relative;background:var(--corridor);border:0 solid var(--wall);padding:0;margin:0;font:inherit;color:inherit}
-.cell.room{background:var(--stone)}
-.cell.wt{border-top-width:3px}.cell.wb{border-bottom-width:3px}.cell.wl{border-left-width:3px}.cell.wr{border-right-width:3px}
-.cell::after{content:"";position:absolute;inset:0;border:1px solid rgba(58,46,40,.22);pointer-events:none}
-.cell.door{box-shadow:inset 0 0 0 2px #7a4b26}
-.cell.reach{background:var(--reach);cursor:pointer}
-.cell.reach:hover{background:#f6e3a0}
-.cell .tok{position:absolute;inset:16%;border-radius:50%;background:var(--token);box-shadow:0 3px 0 #7c1f19,inset 0 -4px 0 rgba(0,0,0,.18);transition:transform .15s}
-.cell .mon{position:absolute;inset:20%;background:#2f4b5c;clip-path:polygon(50% 0,100% 100%,0 100%)}
-.cell .chest{position:absolute;inset:26% 18%;background:#7a4b26;border-radius:2px;box-shadow:inset 0 -3px 0 #4f2f17}
-.board-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:12px;flex-wrap:wrap}
-.dice{display:flex;gap:8px}
-.die{width:40px;height:40px;border-radius:7px;background:var(--ink);color:#1d1a10;display:grid;place-items:center;font:700 1.25rem "Alegreya Sans";box-shadow:0 3px 0 #a9a491}
-.die.roll{animation:shake .35s}
-@keyframes shake{25%{transform:rotate(-14deg)}75%{transform:rotate(12deg)}}
-.board-msg{font-size:.98rem;color:#efe6cf;margin:0;flex:1 1 180px}
-.roll-btn{font-size:.95rem;padding:.55em 1em}
-
-.shot{padding:0 0 72px}
-.shot img{display:block;width:100%;height:auto;border-radius:10px;box-shadow:0 18px 40px rgba(0,0,0,.4);border:2px solid #4a3a2c}
-.shot figcaption{margin-top:12px}
-/* sections */
-section.block{padding:72px 0;border-top:1px solid var(--felt-line)}
-.cols{display:grid;gap:32px}
-@media(min-width:820px){.cols{grid-template-columns:repeat(2,1fr);gap:40px 56px}}
-.ways{display:grid;gap:28px;margin-top:8px}
-@media(min-width:720px){.ways{grid-template-columns:repeat(2,1fr);gap:36px 56px}}
-.ways p{color:var(--ink-soft);margin:0}
-.ways .tool{display:block;color:var(--brass);font-size:.95rem;margin-top:.4em}
-
-.engine{display:grid;gap:40px;align-items:start}
-@media(min-width:900px){.engine{grid-template-columns:1fr 1fr}}
-.engine dl{margin:0}
-.engine dt{font-family:Fondamento,serif;font-size:1.25rem;margin-top:1.1em}
-.engine dt:first-child{margin-top:0}
-.engine dd{margin:.2em 0 0;color:var(--ink-soft);max-width:56ch}
-pre{background:var(--code-bg);border:1px solid var(--felt-line);border-radius:8px;padding:18px 20px;overflow-x:auto;font:400 .9rem/1.55 ui-monospace,SFMono-Regular,Menlo,monospace;color:#dfe6d6;margin:0}
-pre .k{color:var(--brass)} pre .s{color:#a9d4a1} pre .c{color:#7f9a8a}
-figcaption{font-size:.95rem;color:var(--ink-soft);margin-top:10px}
-
-.road{list-style:none;padding:0;margin:0;display:grid;gap:0;counter-reset:f}
-.road li{display:grid;grid-template-columns:44px 1fr;gap:14px;padding:14px 0;border-bottom:1px solid var(--felt-line);counter-increment:f}
-.road li::before{content:counter(f);width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-weight:700;background:var(--ink);color:#1d1a10}
-.road li.todo::before{background:transparent;color:var(--ink-soft);border:2px dashed var(--ink-soft)}
-.road strong{font-weight:700}
-.road span{color:var(--ink-soft)}
-.road li.todo strong{color:var(--brass)}
-
-.join{text-align:left;padding:88px 0}
-.join .box{background:var(--ink);color:#22201a;border-radius:12px;padding:40px 28px;display:grid;gap:24px;box-shadow:0 18px 40px rgba(0,0,0,.3)}
-@media(min-width:820px){.join .box{grid-template-columns:1.4fr 1fr;align-items:center;padding:48px 56px}}
-.join h2{color:#22201a}
-.join p{color:#4b483c}
-.join .btn-ghost{color:#22201a;border-color:#22201a}
-.join .btn-ghost:hover{background:rgba(0,0,0,.06)}
-footer{padding:32px 0 48px;color:var(--ink-soft);font-size:.95rem;border-top:1px solid var(--felt-line)}
-footer p{max-width:80ch}
+html[data-lang="pt"] [data-l="en"],html[data-lang="en"] [data-l="pt"]{display:none}
 </style>
 </head>
 <body>
-<div class="wrap">
-  <header class="top">
-    <a class="brand" href="#">Old Heros</a>
-    <nav aria-label="Seções">
-      <a class="hide-sm" href="#participar">Participar</a>
-      <a class="hide-sm" href="#motor">O motor</a>
-      <a href="https://github.com/MarioTrazzi/heros-quest-simulator">GitHub</a>
-    </nav>
+
+<div class="stone" style="position: relative; min-height: 100vh; font-family: 'Crimson Text', Georgia, serif; color: #e3d3ad; overflow-x: hidden">
+
+  <div aria-hidden="true" style="position: absolute; left: 0; right: 0; top: 0; height: 1100px; pointer-events: none; opacity: 1; background: radial-gradient(ellipse 55% 50% at 62% 42%, rgba(255,168,72,0.30), rgba(255,140,50,0.10) 45%, transparent 75%)"></div>
+  <div aria-hidden="true" style="position: absolute; left: 0; right: 0; top: 0; height: 1100px; pointer-events: none; background: linear-gradient(180deg, rgba(8,7,6,0.65), transparent 22%, transparent 70%, rgba(12,10,8,1))"></div>
+
+  <!-- Barra superior -->
+  <header style="position: relative; max-width: 1240px; margin: 0 auto; padding: 18px clamp(16px, 4vw, 48px); display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 24px">
+    <a href="#topo" style="font-family: 'Fondamento', serif; font-size: 28px; color: #e9c97a; text-decoration: none; letter-spacing: 0.5px; min-height: 44px; display: inline-flex; align-items: center">Old Heros</a>
+    <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 4px 22px">
+      <nav aria-label="Seções" data-pt-aria-label="Seções" data-en-aria-label="Sections" style="display: flex; flex-wrap: wrap; gap: 4px 22px">
+        <a class="navlink" href="#funciona"><span data-l="pt">O que já funciona</span><span data-l="en">What already works</span></a>
+        <a class="navlink" href="#participar"><span data-l="pt">Como participar</span><span data-l="en">How to join</span></a>
+        <a class="navlink" href="#derivar"><span data-l="pt">Derivar</span><span data-l="en">Remix</span></a>
+        <a class="navlink" href="https://github.com/MarioTrazzi/heros-quest-simulator" target="_blank" rel="noopener">GitHub</a>
+      </nav>
+      <div class="langsw" role="group" aria-label="Idioma / Language">
+        <button type="button" class="langbtn" data-set-lang="pt" lang="pt-BR" aria-label="Português" aria-pressed="false">PT</button>
+        <button type="button" class="langbtn" data-set-lang="en" lang="en" aria-label="English" aria-pressed="false">EN</button>
+      </div>
+    </div>
   </header>
 
-  <main>
-  <section class="hero">
-    <div>
-      <h1><span class="game-name">Old Heros</span>: um jogo de tabuleiro aberto para você remixar</h1>
-      <p class="lead">Um dungeon crawl de heróis, salas escuras e dados, feito em Godot com ajuda de IA. As regras já funcionam. Agora queremos gente para criar quests, heróis, monstros e jogos inteiros derivados dele.</p>
-      <div class="ctas">
-        <a class="btn btn-main js-join" href="#">Quero contribuir</a>
-        <a class="btn btn-ghost" href="https://github.com/MarioTrazzi/heros-quest-simulator">Ver o código</a>
+  <!-- 1. Topo -->
+  <section id="topo" style="position: relative; max-width: 1240px; margin: 0 auto; padding: clamp(24px, 5vw, 64px) clamp(16px, 4vw, 48px) clamp(56px, 8vw, 110px); display: flex; flex-wrap: wrap; align-items: center; gap: 56px 64px">
+    <div style="flex: 1 1 420px; min-width: 0; display: flex; flex-direction: column; gap: 22px">
+      <p style="margin: 0; font-size: 18px; letter-spacing: 2.5px; text-transform: uppercase; color: #c7a65e"><span data-l="pt">Tabuleiro 3D · Código aberto · Feito em Godot</span><span data-l="en">3D board · Open source · Made in Godot</span></p>
+      <h1 style="margin: 0; font-family: 'Fondamento', serif; font-weight: 400; font-size: clamp(60px, 9vw, 116px); line-height: 0.95; color: #f0dca8; text-shadow: 0 0 28px rgba(255,170,70,0.35), 0 4px 0 #2a1a0c, 0 8px 22px rgba(0,0,0,0.8)">Old Heros</h1>
+      <p style="margin: 0; font-size: clamp(24px, 2.6vw, 31px); line-height: 1.3; color: #efe2c2; max-width: 30ch"><span data-l="pt">Um jogo de masmorra aberto para você jogar, remixar e expandir.</span><span data-l="en">An open dungeon game for you to play, remix and expand.</span></p>
+      <p style="margin: 0; font-size: 20px; line-height: 1.55; color: #cbb98f; max-width: 46ch"><span data-l="pt">Heróis, monstros, dados e névoa num tabuleiro 3D. O código é livre e foi escrito com ajuda de IA. Falta gente para criar quests, arte, regras e jogos novos a partir dele.</span><span data-l="en">Heroes, monsters, dice and fog on a 3D board. The code is free and was written with help from AI. What it needs now is people to create quests, art, rules and new games from it.</span></p>
+      <div style="display: flex; flex-wrap: wrap; gap: 16px; margin-top: 6px">
+        <a class="btn" href="https://github.com/MarioTrazzi/heros-quest-simulator/issues/new?title=Quero%20contribuir" data-pt-href="https://github.com/MarioTrazzi/heros-quest-simulator/issues/new?title=Quero%20contribuir" data-en-href="https://github.com/MarioTrazzi/heros-quest-simulator/issues/new?title=I%20want%20to%20contribute" target="_blank" rel="noopener" data-roll=""><span data-l="pt">Quero contribuir</span><span data-l="en">I want to contribute</span></a>
+        <a class="btn btn-dark" href="https://github.com/MarioTrazzi/heros-quest-simulator" target="_blank" rel="noopener"><span data-l="pt">Ver o código</span><span data-l="en">See the code</span></a>
+      </div>
+      <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 14px 22px; margin-top: 14px">
+        <button class="dicebtn" id="dice" type="button" aria-label="Rolar os dados" data-pt-aria-label="Rolar os dados" data-en-aria-label="Roll the dice" data-roll="">
+          <div class="die d1">
+            <span class="pip"></span><span class="pip"></span><span class="pip"></span><span class="pip"></span><span class="pip"></span><span class="pip"></span><span class="pip"></span><span class="pip"></span><span class="pip"></span>
+          </div>
+          <div class="die d2">
+            <span class="pip"></span><span class="pip"></span><span class="pip"></span><span class="pip"></span><span class="pip"></span><span class="pip"></span><span class="pip"></span><span class="pip"></span><span class="pip"></span>
+          </div>
+        </button>
+        <p aria-live="polite" style="margin: 0; font-style: italic; font-size: 19px; color: #c7b386"><span id="resultado">Deu 6 e 5.</span><br><span style="font-size: 16px; color: #a9966c"><span data-l="pt">Clique nos dados para rolar de novo.</span><span data-l="en">Click the dice to roll again.</span></span></p>
       </div>
     </div>
 
-    <figure style="margin:0">
-      <div class="table-board">
-        <div class="board" id="board" role="grid" aria-label="Tabuleiro de exemplo"></div>
-        <div class="board-bar">
-          <div class="dice" aria-hidden="true"><div class="die" id="d1">?</div><div class="die" id="d2">?</div></div>
-          <p class="board-msg" id="msg" aria-live="polite">Role os dados para mover o herói.</p>
-          <button class="btn btn-main roll-btn" id="roll" type="button">Rolar dados</button>
+    <div style="flex: 1 1 520px; min-width: 0; position: relative; padding: 10px 0 34px">
+      <div class="tilt" style="transform: rotate(1.6deg); padding: clamp(8px, 1.4vw, 16px); background: linear-gradient(160deg, #573821, #2b1a0d 60%, #3d2716); border: 2px solid #a8823c; border-radius: 6px; box-shadow: 0 0 0 5px #1a1109, 0 0 0 6px #6b4e1f, 0 34px 70px rgba(0,0,0,0.85), 0 0 90px rgba(255,150,60,0.12)">
+        <img src="img/partida.jpg" width="1280" height="720" alt="Captura do jogo: sala da masmorra em 3D com Bárbaro, Anão, Elfo e Mago; fichas de pergaminho do Goblin e do Mago; cartas de feitiço na base da tela e o registro da rodada 7." data-pt-alt="Captura do jogo: sala da masmorra em 3D com Bárbaro, Anão, Elfo e Mago; fichas de pergaminho do Goblin e do Mago; cartas de feitiço na base da tela e o registro da rodada 7." data-en-alt="Game screenshot: a 3D dungeon room with the Barbarian, Dwarf, Elf and Wizard; parchment stat cards for the Goblin and the Wizard; spell cards along the bottom of the screen and the round 7 log." style="display: block; width: 100%; height: auto; border: 1px solid #000; border-radius: 2px">
+      </div>
+      <div class="card tilt" style="position: absolute; left: clamp(-10px, -1vw, 0px); bottom: 0; transform: rotate(-4deg); padding: 18px 26px; max-width: 280px">
+        <p style="margin: 0; font-family: 'Fondamento', serif; font-size: 20px; line-height: 1.2"><span data-l="pt">Rodada 7 — Mago</span><span data-l="en">Round 7 — Wizard</span></p>
+        <p style="margin: 4px 0 0; font-size: 16px; font-style: italic; color: #5a4128"><span data-l="pt">Captura real do jogo, sem retoque.</span><span data-l="en">Real in-game screenshot, no retouching.</span></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. O que já funciona -->
+  <section id="funciona" style="position: relative; max-width: 1240px; margin: 0 auto; padding: 40px clamp(16px, 4vw, 48px) 110px">
+    <div style="display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center; margin-bottom: 56px">
+      <svg aria-hidden="true" width="220" height="18" viewBox="0 0 220 18"><path d="M0 9 H92 M128 9 H220" stroke="#a8823c" stroke-width="1.5" fill="none"></path><path d="M110 1 L119 9 L110 17 L101 9 Z" fill="#a8823c"></path><circle cx="96" cy="9" r="2.5" fill="#a8823c"></circle><circle cx="124" cy="9" r="2.5" fill="#a8823c"></circle></svg>
+      <h2 style="margin: 0; font-family: 'Fondamento', serif; font-weight: 400; font-size: clamp(40px, 5vw, 60px); color: #f0dca8; text-shadow: 0 4px 18px rgba(0,0,0,0.8)"><span data-l="pt">O que já funciona</span><span data-l="en">What already works</span></h2>
+      <p style="margin: 0; font-size: 21px; color: #cbb98f; max-width: 52ch"><span data-l="pt">Não é protótipo de papel. Dá para baixar, abrir no Godot e jogar uma quest inteira.</span><span data-l="en">This isn't a paper prototype. You can download it, open it in Godot and play a whole quest.</span></p>
+    </div>
+
+    <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 34px 30px">
+      <div class="card feat tilt" style="flex: 1 1 250px; max-width: 290px; padding: 30px 28px 32px; transform: rotate(-2deg); display: flex; flex-direction: column; gap: 12px">
+        <svg class="ico" aria-hidden="true" viewBox="0 0 64 64"><path d="M32 10 L58 24 L32 38 L6 24 Z"></path><path d="M19 17 L45 31 M45 17 L19 31"></path><path d="M6 24 V34 L32 48 L58 34 V24 M32 38 V48"></path><path d="M11 32 l5 3 M11 37 l5 3 M48 35 l5 -3 M48 40 l5 -3"></path></svg>
+        <h3 style="margin: 0; font-family: 'Fondamento', serif; font-weight: 400; font-size: 26px"><span data-l="pt">Tabuleiro 3D</span><span data-l="en">3D board</span></h3>
+        <p style="margin: 0; font-size: 18px; line-height: 1.45"><span data-l="pt">Salas, corredores e portas divididos em casas, com as miniaturas em pé sobre a mesa.</span><span data-l="en">Rooms, corridors and doors laid out in squares, with the miniatures standing on the table.</span></p>
+      </div>
+      <div class="card feat tilt" style="flex: 1 1 250px; max-width: 290px; padding: 30px 28px 32px; transform: rotate(1.5deg) translateY(14px); display: flex; flex-direction: column; gap: 12px">
+        <svg class="ico" aria-hidden="true" viewBox="0 0 64 64"><path d="M8 14 H30 V30 C30 42 19 50 19 50 C19 50 8 42 8 30 Z"></path><path d="M13 20 V34 M18 18 V40 M23 20 V36"></path><path d="M36 22 C36 12 58 12 58 22 V30 C58 33 55 34 54 36 V42 H40 V36 C39 34 36 33 36 30 Z"></path><circle cx="42" cy="26" r="3"></circle><circle cx="52" cy="26" r="3"></circle><path d="M44 42 V38 M48 42 V38 M52 42 V38"></path></svg>
+        <h3 style="margin: 0; font-family: 'Fondamento', serif; font-weight: 400; font-size: 26px"><span data-l="pt">Combate com dados</span><span data-l="en">Dice combat</span></h3>
+        <p style="margin: 0; font-size: 18px; line-height: 1.45"><span data-l="pt">Ataque rola caveiras, defesa rola escudos. Cada caveira que passa vira dano no corpo.</span><span data-l="en">Attack rolls skulls, defense rolls shields. Every skull that gets through becomes body damage.</span></p>
+      </div>
+      <div class="card feat tilt" style="flex: 1 1 250px; max-width: 290px; padding: 30px 28px 32px; transform: rotate(-0.8deg); display: flex; flex-direction: column; gap: 12px">
+        <svg class="ico" aria-hidden="true" viewBox="0 0 64 64"><path d="M18 8 C18 18 21 23 26 26 M46 8 C46 18 43 23 38 26"></path><path d="M22 30 C22 22 42 22 42 30 V40 C42 48 36 54 32 54 C28 54 22 48 22 40 Z"></path><path d="M26 35 l5 2 M38 35 l-5 2"></path><path d="M26 46 L29 43 L32 47 L35 43 L38 46"></path></svg>
+        <h3 style="margin: 0; font-family: 'Fondamento', serif; font-weight: 400; font-size: 26px"><span data-l="pt">IA dos monstros</span><span data-l="en">Monster AI</span></h3>
+        <p style="margin: 0; font-size: 18px; line-height: 1.45"><span data-l="pt">Goblins, orcs e companhia andam, cercam e atacam sozinhos no turno deles.</span><span data-l="en">Goblins, orcs and friends move, surround and attack on their own during their turn.</span></p>
+      </div>
+      <div class="card feat tilt" style="flex: 1 1 250px; max-width: 290px; padding: 30px 28px 32px; transform: rotate(2.2deg) translateY(8px); display: flex; flex-direction: column; gap: 12px">
+        <svg class="ico" aria-hidden="true" viewBox="0 0 64 64"><path d="M20 50 V26 C20 13 44 13 44 26 V50"></path><path d="M28 17 V50 M36 17 V50"></path><circle cx="40" cy="36" r="1.5" class="fill"></circle><path d="M4 46 c6 -4 10 4 16 0 M44 46 c6 -4 10 4 16 0 M4 55 c9 -4 15 4 24 0 c9 -4 15 4 24 0 c3 -1 6 -1 8 0"></path></svg>
+        <h3 style="margin: 0; font-family: 'Fondamento', serif; font-weight: 400; font-size: 26px"><span data-l="pt">Névoa de guerra</span><span data-l="en">Fog of war</span></h3>
+        <p style="margin: 0; font-size: 18px; line-height: 1.45"><span data-l="pt">A masmorra fica escura até um herói abrir a porta. O que está do outro lado é surpresa.</span><span data-l="en">The dungeon stays dark until a hero opens the door. Whatever is on the other side is a surprise.</span></p>
+      </div>
+      <div class="card feat tilt" style="flex: 1 1 250px; max-width: 290px; padding: 30px 28px 32px; transform: rotate(1deg); display: flex; flex-direction: column; gap: 12px">
+        <svg class="ico" aria-hidden="true" viewBox="0 0 64 64"><path d="M10 28 H54 V52 H10 Z"></path><path d="M10 28 C10 15 54 15 54 28"></path><path d="M10 36 H54"></path><path d="M29 32 H35 V42 H29 Z"></path><path d="M14 42 l4 7 M20 42 l4 7 M42 42 l4 7 M48 42 l4 7"></path></svg>
+        <h3 style="margin: 0; font-family: 'Fondamento', serif; font-weight: 400; font-size: 26px"><span data-l="pt">Armadilhas e tesouros</span><span data-l="en">Traps and treasure</span></h3>
+        <p style="margin: 0; font-size: 18px; line-height: 1.45"><span data-l="pt">Procure antes de andar. Algumas casas guardam ouro; outras, um fosso.</span><span data-l="en">Search before you step. Some squares hide gold; others, a pit.</span></p>
+      </div>
+      <div class="card feat tilt" style="flex: 1 1 250px; max-width: 290px; padding: 30px 28px 32px; transform: rotate(-1.8deg) translateY(12px); display: flex; flex-direction: column; gap: 12px">
+        <svg class="ico" aria-hidden="true" viewBox="0 0 64 64"><path d="M32 6 C38 19 48 24 46 38 C45 48 38 56 32 56 C26 56 18 48 18 38 C17 28 26 25 28 15 C30 21 34 23 32 6 Z"></path><path d="M32 30 C36 36 38 41 36 46 C34 51 30 51 28 46 C26 42 30 37 32 30 Z"></path></svg>
+        <h3 style="margin: 0; font-family: 'Fondamento', serif; font-weight: 400; font-size: 26px"><span data-l="pt">Magia</span><span data-l="en">Magic</span></h3>
+        <p style="margin: 0; font-size: 18px; line-height: 1.45"><span data-l="pt">Cartas de feitiço por escola, como Bola de Fogo e Pele de Pedra, com teste de resistência.</span><span data-l="en">Spell cards by school, like Fireball and Stone Skin, with resistance rolls.</span></p>
+      </div>
+      <div class="card feat tilt" style="flex: 1 1 250px; max-width: 290px; padding: 30px 28px 32px; transform: rotate(0.6deg); display: flex; flex-direction: column; gap: 12px">
+        <svg class="ico" aria-hidden="true" viewBox="0 0 64 64"><path d="M14 52 L46 20 M42 14 L50 22 M10 46 L18 54"></path><path d="M50 52 L18 20 M14 22 L22 14 M46 54 L54 46"></path><path d="M44 12 L52 4 M20 12 L12 4"></path></svg>
+        <h3 style="margin: 0; font-family: 'Fondamento', serif; font-weight: 400; font-size: 26px"><span data-l="pt">Campanha</span><span data-l="en">Campaign</span></h3>
+        <p style="margin: 0; font-size: 18px; line-height: 1.45"><span data-l="pt">Quests em sequência, armeria entre uma e outra para gastar o ouro, e save do progresso.</span><span data-l="en">Quests in sequence, an armory between them to spend your gold, and saved progress.</span></p>
+      </div>
+      <div class="card feat tilt" style="flex: 1 1 250px; max-width: 290px; padding: 30px 28px 32px; transform: rotate(-2.4deg) translateY(6px); display: flex; flex-direction: column; gap: 12px">
+        <svg class="ico" aria-hidden="true" viewBox="0 0 64 64"><circle cx="21" cy="26" r="6"></circle><path d="M10 52 C10 37 32 37 32 52 Z"></path><circle cx="43" cy="26" r="6"></circle><path d="M32 52 C32 37 54 37 54 52 Z"></path><path d="M24 12 C29 7 35 7 40 12 M27 16 C30 13 34 13 37 16"></path></svg>
+        <h3 style="margin: 0; font-family: 'Fondamento', serif; font-weight: 400; font-size: 26px"><span data-l="pt">Multiplayer online</span><span data-l="en">Online multiplayer</span></h3>
+        <p style="margin: 0; font-size: 18px; line-height: 1.45"><span data-l="pt">Crie uma sala, mande o código e cada amigo controla um herói pela internet.</span><span data-l="en">Create a room, share the code, and each friend controls a hero over the internet.</span></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. Como participar -->
+  <section id="participar" style="position: relative; padding: 110px 0 120px; background: radial-gradient(ellipse 60% 55% at 50% 45%, rgba(255,160,70,0.10), transparent 70%)">
+    <div style="max-width: 1240px; margin: 0 auto; padding: 0 clamp(16px, 4vw, 48px)">
+      <div style="display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center; margin-bottom: 64px">
+        <svg aria-hidden="true" width="220" height="18" viewBox="0 0 220 18"><path d="M0 9 H92 M128 9 H220" stroke="#a8823c" stroke-width="1.5" fill="none"></path><path d="M110 1 L119 9 L110 17 L101 9 Z" fill="#a8823c"></path><circle cx="96" cy="9" r="2.5" fill="#a8823c"></circle><circle cx="124" cy="9" r="2.5" fill="#a8823c"></circle></svg>
+        <h2 style="margin: 0; font-family: 'Fondamento', serif; font-weight: 400; font-size: clamp(40px, 5vw, 60px); color: #f0dca8; text-shadow: 0 4px 18px rgba(0,0,0,0.8)"><span data-l="pt">Como participar</span><span data-l="en">How to join</span></h2>
+        <p style="margin: 0; font-size: 21px; color: #cbb98f; max-width: 54ch"><span data-l="pt">Escolha uma carta. Tem lugar para quem escreve, quem desenha, quem programa e quem quer fazer o próprio jogo.</span><span data-l="en">Pick a card. There's room for writers, artists, programmers and anyone who wants to make their own game.</span></p>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 500px), 1fr)); gap: 48px 44px">
+
+        <div class="card tilt" style="padding: 36px 38px 38px; transform: rotate(-1.6deg); display: flex; flex-direction: column; gap: 18px">
+          <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap">
+            <h3 style="margin: 0; font-family: 'Fondamento', serif; font-weight: 400; font-size: 34px"><span data-l="pt">Escrever quests</span><span data-l="en">Write quests</span></h3>
+            <span style="font-style: italic; font-size: 17px; color: #7a2016"><span data-l="pt">Sem programar</span><span data-l="en">No coding</span></span>
+          </div>
+          <div class="gravura" style="height: 170px; display: flex; align-items: center; justify-content: center">
+            <svg class="ill" aria-hidden="true" width="230" height="150" viewBox="0 0 230 150"><path d="M30 18 H190 C204 18 204 40 190 40 H46"></path><path d="M30 18 C16 18 16 40 30 40 V122 H196 C210 122 210 144 196 144 H40 C26 144 26 122 40 122"></path><path d="M190 40 V122"></path><rect x="56" y="54" width="40" height="30"></rect><rect x="120" y="54" width="52" height="54"></rect><path d="M96 69 H120"></path><path d="M76 84 V108 H120"></path><path d="M68 66 l6 6 m0 -6 l-6 6" style="stroke: #7a2016"></path><path d="M140 74 l10 10 m0 -10 l-10 10" style="stroke: #7a2016; stroke-width: 3"></path><path d="M62 98 h4 M62 104 h4 M100 112 h6"></path></svg>
+          </div>
+          <p style="margin: 0; font-size: 19px; line-height: 1.5"><span data-l="pt">Uma quest é um arquivo JSON: o mapa, as portas, os monstros, os tesouros, as armadilhas e o objetivo. Desenhe a masmorra, descreva em texto e o jogo monta tudo.</span><span data-l="en">A quest is a JSON file: the map, the doors, the monsters, the treasure, the traps and the goal. Sketch the dungeon, describe it in text and the game builds the rest.</span></p>
+          <a href="https://github.com/MarioTrazzi/heros-quest-simulator/issues/new?title=Quero%20contribuir" data-pt-href="https://github.com/MarioTrazzi/heros-quest-simulator/issues/new?title=Quero%20contribuir" data-en-href="https://github.com/MarioTrazzi/heros-quest-simulator/issues/new?title=I%20want%20to%20contribute" target="_blank" rel="noopener" style="font-style: italic; font-size: 19px; color: #6b3c12; min-height: 44px; display: inline-flex; align-items: center"><span data-l="pt">Propor uma quest →</span><span data-l="en">Propose a quest →</span></a>
+        </div>
+
+        <div class="card tilt" style="padding: 36px 38px 38px; transform: rotate(1.2deg) translateY(28px); display: flex; flex-direction: column; gap: 18px">
+          <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap">
+            <h3 style="margin: 0; font-family: 'Fondamento', serif; font-weight: 400; font-size: 34px"><span data-l="pt">Criar heróis e monstros</span><span data-l="en">Create heroes and monsters</span></h3>
+            <span style="font-style: italic; font-size: 17px; color: #7a2016"><span data-l="pt">Blender · ilustração · IA</span><span data-l="en">Blender · illustration · AI</span></span>
+          </div>
+          <div class="gravura" style="height: 170px; display: flex; align-items: center; justify-content: center">
+            <svg class="ill" aria-hidden="true" width="230" height="150" viewBox="0 0 230 150"><ellipse cx="82" cy="128" rx="40" ry="10"></ellipse><path d="M42 128 V120 C42 114 122 114 122 120 V128"></path><circle cx="82" cy="34" r="12"></circle><path d="M70 30 C70 14 94 14 94 30"></path><path d="M66 112 L72 66 C74 54 90 54 92 66 L98 112 Z"></path><path d="M72 70 L54 92 M92 70 L108 48"></path><path d="M108 48 L114 20 M104 36 L120 32"></path><path d="M76 80 V108 M82 76 V110 M88 80 V108"></path><rect x="146" y="28" width="58" height="76" rx="3"></rect><path d="M154 40 H196 V84 H154 Z"></path><path d="M162 76 C164 62 186 62 188 76 M168 56 a7 7 0 1 0 14 0 a7 7 0 1 0 -14 0"></path><path d="M154 94 H196"></path><path d="M150 118 L196 112"></path><path d="M196 112 l10 -2 l-8 6 Z" class="fill"></path></svg>
+          </div>
+          <p style="margin: 0; font-size: 19px; line-height: 1.5"><span data-l="pt">Cada personagem precisa de uma miniatura e de uma ficha. Modele no Blender, pinte o retrato da carta, ou gere com IA e acerte à mão. Monstros novos trazem seus atributos em JSON.</span><span data-l="en">Every character needs a miniature and a stat card. Model it in Blender, paint the card portrait, or generate it with AI and touch it up by hand. New monsters bring their stats in JSON.</span></p>
+          <a href="https://github.com/MarioTrazzi/heros-quest-simulator/issues/new?title=Quero%20contribuir" data-pt-href="https://github.com/MarioTrazzi/heros-quest-simulator/issues/new?title=Quero%20contribuir" data-en-href="https://github.com/MarioTrazzi/heros-quest-simulator/issues/new?title=I%20want%20to%20contribute" target="_blank" rel="noopener" style="font-style: italic; font-size: 19px; color: #6b3c12; min-height: 44px; display: inline-flex; align-items: center"><span data-l="pt">Mostrar sua arte →</span><span data-l="en">Show your art →</span></a>
+        </div>
+
+        <div class="card tilt" style="padding: 36px 38px 38px; transform: rotate(0.9deg); display: flex; flex-direction: column; gap: 18px">
+          <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap">
+            <h3 style="margin: 0; font-family: 'Fondamento', serif; font-weight: 400; font-size: 34px"><span data-l="pt">Mexer nas regras</span><span data-l="en">Tweak the rules</span></h3>
+            <span style="font-style: italic; font-size: 17px; color: #7a2016">GDScript</span>
+          </div>
+          <div class="gravura" style="height: 170px; display: flex; align-items: center; justify-content: center">
+            <svg class="ill" aria-hidden="true" width="230" height="150" viewBox="0 0 230 150"><circle cx="70" cy="76" r="34"></circle><circle cx="70" cy="76" r="12"></circle><path d="M70 30 V42 M70 110 V122 M24 76 H36 M104 76 H116 M38 44 L46 52 M94 100 L102 108 M38 108 L46 100 M94 52 L102 44"></path><rect x="134" y="40" width="44" height="44" rx="6" transform="rotate(-12 156 62)"></rect><circle cx="146" cy="56" r="3.5" class="fill"></circle><circle cx="166" cy="66" r="3.5" class="fill"></circle><rect x="160" y="88" width="44" height="44" rx="6" transform="rotate(10 182 110)"></rect><circle cx="172" cy="100" r="3.5" class="fill"></circle><circle cx="182" cy="110" r="3.5" class="fill"></circle><circle cx="192" cy="120" r="3.5" class="fill"></circle></svg>
+          </div>
+          <p style="margin: 0; font-size: 19px; line-height: 1.5"><span data-l="pt">Movimento, combate, magia e o turno dos monstros estão em GDScript, sem depender das cenas. Quer outra regra de defesa ou um monstro mais esperto? Mude o código e rode os testes.</span><span data-l="en">Movement, combat, magic and the monsters' turn live in GDScript, independent of the scenes. Want a different defense rule or a smarter monster? Change the code and run the tests.</span></p>
+          <a href="https://github.com/MarioTrazzi/heros-quest-simulator" target="_blank" rel="noopener" style="font-style: italic; font-size: 19px; color: #6b3c12; min-height: 44px; display: inline-flex; align-items: center"><span data-l="pt">Ler o código das regras →</span><span data-l="en">Read the rules code →</span></a>
+        </div>
+
+        <div class="card tilt" style="padding: 36px 38px 38px; transform: rotate(-1.1deg) translateY(28px); display: flex; flex-direction: column; gap: 18px">
+          <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap">
+            <h3 style="margin: 0; font-family: 'Fondamento', serif; font-weight: 400; font-size: 34px"><span data-l="pt">Fazer um jogo derivado</span><span data-l="en">Make a spin-off game</span></h3>
+            <span style="font-style: italic; font-size: 17px; color: #7a2016"><span data-l="pt">Fork e troca o tema</span><span data-l="en">Fork it and reskin</span></span>
+          </div>
+          <div class="gravura" style="height: 170px; display: flex; align-items: center; justify-content: center">
+            <svg class="ill" aria-hidden="true" width="230" height="150" viewBox="0 0 230 150"><path d="M30 130 C60 120 80 100 96 76"></path><path d="M46 132 C70 124 92 106 108 82"></path><path d="M96 76 C110 54 130 40 170 26"></path><path d="M108 82 C122 62 140 50 176 40"></path><path d="M104 80 C132 82 158 96 196 104"></path><path d="M110 92 C136 96 160 110 192 122"></path><circle cx="186" cy="30" r="10"></circle><path d="M186 20 V12 M186 40 V48"></path><rect x="198" y="100" width="16" height="22"></rect><path d="M206 100 V88 L216 94 L206 98"></path><path d="M54 128 l2 -6 M68 122 l2 -6 M82 112 l3 -5"></path></svg>
+          </div>
+          <p style="margin: 0; font-size: 19px; line-height: 1.5"><span data-l="pt">Faça um fork, troque modelos, cartas e textos e publique com outro nome. Uma nave infestada, uma cripta, um navio pirata: o motor de turnos e dados continua o mesmo.</span><span data-l="en">Fork it, swap the models, cards and text, and publish it under a new name. An infested starship, a crypt, a pirate ship: the turn and dice engine stays the same.</span></p>
+          <a href="https://github.com/MarioTrazzi/heros-quest-simulator/fork" target="_blank" rel="noopener" style="font-style: italic; font-size: 19px; color: #6b3c12; min-height: 44px; display: inline-flex; align-items: center"><span data-l="pt">Fazer um fork →</span><span data-l="en">Fork it →</span></a>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. Por que é fácil derivar -->
+  <section id="derivar" style="position: relative; max-width: 1240px; margin: 0 auto; padding: 80px clamp(16px, 4vw, 48px) 120px">
+    <div style="display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center; margin-bottom: 60px">
+      <svg aria-hidden="true" width="220" height="18" viewBox="0 0 220 18"><path d="M0 9 H92 M128 9 H220" stroke="#a8823c" stroke-width="1.5" fill="none"></path><path d="M110 1 L119 9 L110 17 L101 9 Z" fill="#a8823c"></path><circle cx="96" cy="9" r="2.5" fill="#a8823c"></circle><circle cx="124" cy="9" r="2.5" fill="#a8823c"></circle></svg>
+      <h2 style="margin: 0; font-family: 'Fondamento', serif; font-weight: 400; font-size: clamp(40px, 5vw, 60px); color: #f0dca8; text-shadow: 0 4px 18px rgba(0,0,0,0.8)"><span data-l="pt">Por que é fácil derivar</span><span data-l="en">Why it's easy to remix</span></h2>
+      <p style="margin: 0; font-size: 21px; color: #cbb98f; max-width: 52ch"><span data-l="pt">Três decisões de projeto fazem o trabalho pesado por você.</span><span data-l="en">Three design decisions do the heavy lifting for you.</span></p>
+    </div>
+
+    <div style="display: flex; flex-wrap: wrap; gap: 48px 56px; align-items: flex-start">
+      <ol style="flex: 1 1 460px; min-width: 0; margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 34px">
+        <li style="display: flex; gap: 22px; align-items: flex-start">
+          <span aria-hidden="true" style="flex: none; width: 54px; height: 54px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Fondamento', serif; font-size: 28px; color: #2a1c10; background: radial-gradient(circle at 40% 35%, #f0dca8, #b8913f 70%, #7a5a22); box-shadow: 0 4px 10px rgba(0,0,0,0.6)">1</span>
+          <div style="display: flex; flex-direction: column; gap: 6px">
+            <h3 style="margin: 0; font-family: 'Fondamento', serif; font-weight: 400; font-size: 30px; color: #f0dca8"><span data-l="pt">Regras separadas do visual</span><span data-l="en">Rules kept apart from visuals</span></h3>
+            <p style="margin: 0; font-size: 20px; line-height: 1.55; color: #d6c69f"><span data-l="pt">A lógica do jogo não sabe como as peças são desenhadas. Dá para trocar modelos, texturas e cartas sem quebrar o combate, e mudar o combate sem abrir o Blender.</span><span data-l="en">The game logic doesn't know how the pieces are drawn. You can swap models, textures and cards without breaking combat, and change combat without opening Blender.</span></p>
+          </div>
+        </li>
+        <li style="display: flex; gap: 22px; align-items: flex-start">
+          <span aria-hidden="true" style="flex: none; width: 54px; height: 54px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Fondamento', serif; font-size: 28px; color: #2a1c10; background: radial-gradient(circle at 40% 35%, #f0dca8, #b8913f 70%, #7a5a22); box-shadow: 0 4px 10px rgba(0,0,0,0.6)">2</span>
+          <div style="display: flex; flex-direction: column; gap: 6px">
+            <h3 style="margin: 0; font-family: 'Fondamento', serif; font-weight: 400; font-size: 30px; color: #f0dca8"><span data-l="pt">Tudo em arquivos JSON</span><span data-l="en">Everything in JSON files</span></h3>
+            <p style="margin: 0; font-size: 20px; line-height: 1.55; color: #d6c69f"><span data-l="pt">Heróis, monstros, feitiços, itens e quests são dados. Um tema novo começa editando texto, não reescrevendo sistemas.</span><span data-l="en">Heroes, monsters, spells, items and quests are data. A new theme starts with editing text, not rewriting systems.</span></p>
+          </div>
+        </li>
+        <li style="display: flex; gap: 22px; align-items: flex-start">
+          <span aria-hidden="true" style="flex: none; width: 54px; height: 54px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Fondamento', serif; font-size: 28px; color: #2a1c10; background: radial-gradient(circle at 40% 35%, #f0dca8, #b8913f 70%, #7a5a22); box-shadow: 0 4px 10px rgba(0,0,0,0.6)">3</span>
+          <div style="display: flex; flex-direction: column; gap: 6px">
+            <h3 style="margin: 0; font-family: 'Fondamento', serif; font-weight: 400; font-size: 30px; color: #f0dca8"><span data-l="pt">A partida é uma semente e uma lista de jogadas</span><span data-l="en">A match is a seed and a list of moves</span></h3>
+            <p style="margin: 0; font-size: 20px; line-height: 1.55; color: #d6c69f"><span data-l="pt">Com a mesma semente, os dados caem do mesmo jeito. Guardando só as jogadas, o jogo refaz a partida inteira. É isso que dá replay, save e online sem código extra para cada um.</span><span data-l="en">With the same seed, the dice land the same way. By storing only the moves, the game can rebuild the whole match. That's what gives you replay, save and online play without extra code for each.</span></p>
+          </div>
+        </li>
+      </ol>
+
+      <div style="flex: 1 1 440px; min-width: 0; display: flex; flex-direction: column; gap: 22px">
+        <div class="card tilt" style="padding: 34px 34px 30px; transform: rotate(1.4deg)">
+          <div data-l="pt">
+          <p style="margin: 0 0 12px; font-family: 'Fondamento', serif; font-size: 22px">partida.json</p>
+          <div style="overflow-x: auto; background: rgba(42,28,16,0.07); border: 1px solid rgba(42,28,16,0.35); border-radius: 3px; padding: 16px 18px">
+            <pre style="margin: 0; font-size: 15.5px; line-height: 1.6; color: #2a1c10; white-space: pre">{
+  "semente": 48213,
+  "jogadas": [
+    ["Barbaro", "mover",   [6, 4]],
+    ["Anao",    "atacar",  "Orc"],
+    ["Mago",    "feitico", "pele_de_pedra", "Mago"],
+    ["Mago",    "feitico", "bola_de_fogo",  "Orc"]
+  ]
+}</pre>
+          </div>
+          <p style="margin: 12px 0 0; font-size: 16px; font-style: italic; color: #5a4128">Exemplo ilustrativo. O formato real está no repositório.</p>
+          </div>
+          <div data-l="en">
+          <p style="margin: 0 0 12px; font-family: 'Fondamento', serif; font-size: 22px">match.json</p>
+          <div style="overflow-x: auto; background: rgba(42,28,16,0.07); border: 1px solid rgba(42,28,16,0.35); border-radius: 3px; padding: 16px 18px">
+            <pre style="margin: 0; font-size: 15.5px; line-height: 1.6; color: #2a1c10; white-space: pre">{
+  "seed": 48213,
+  "moves": [
+    ["Barbarian", "move",   [6, 4]],
+    ["Dwarf",     "attack", "Orc"],
+    ["Wizard",    "spell",  "stone_skin", "Wizard"],
+    ["Wizard",    "spell",  "fireball",   "Orc"]
+  ]
+}</pre>
+          </div>
+          <p style="margin: 12px 0 0; font-size: 16px; font-style: italic; color: #5a4128">Illustrative example. The real format is in the repository.</p>
+          </div>
+        </div>
+        <div style="display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: center; padding: 0 8px">
+          <span style="font-family: 'Fondamento', serif; font-size: 20px; color: #e9c97a"><span data-l="pt">semente + jogadas</span><span data-l="en">seed + moves</span></span>
+          <span aria-hidden="true" style="font-size: 22px; color: #a8823c">→</span>
+          <span style="padding: 8px 16px; border: 1.5px solid #a8823c; border-radius: 999px; font-style: italic; font-size: 18px; color: #ecdcb4; background: rgba(90,58,31,0.45)">replay</span>
+          <span style="padding: 8px 16px; border: 1.5px solid #a8823c; border-radius: 999px; font-style: italic; font-size: 18px; color: #ecdcb4; background: rgba(90,58,31,0.45)">save</span>
+          <span style="padding: 8px 16px; border: 1.5px solid #a8823c; border-radius: 999px; font-style: italic; font-size: 18px; color: #ecdcb4; background: rgba(90,58,31,0.45)">online</span>
         </div>
       </div>
-      <figcaption>Experimente: as paredes ficam entre as casas, e o herói só passa pelas portas, como no jogo.</figcaption>
-    </figure>
+    </div>
   </section>
 
-  <figure class="shot" style="margin:0">
-    <img src="img/partida.jpg" width="1280" height="720" loading="lazy" alt="Partida em andamento no Godot: o Mago lança Bola de Fogo num orc dentro de uma sala da masmorra, com as fichas do Goblin e do Mago, as cartas de feitiço na mão e o registro das jogadas">
-    <figcaption>O jogo hoje, rodando no Godot: o Mago lança Bola de Fogo num orc. Tabuleiro, miniaturas e dados em 3D, fichas e cartas na tela.</figcaption>
-  </figure>
-
-  <section class="block" id="participar">
-    <h2>Como você pode participar</h2>
-    <p>Não precisa saber programar para tudo. Escolha por onde começar.</p>
-    <div class="ways">
-      <div>
-        <h3>Escrever quests</h3>
-        <p>Monte mapas, monstros, armadilhas e a história de cada aventura. Uma quest é um arquivo de texto simples.</p>
-        <span class="tool">JSON, sem programar</span>
-      </div>
-      <div>
-        <h3>Criar heróis e monstros</h3>
-        <p>Desenhe personagens, cartas e miniaturas 3D próprias, à mão ou com IA, para dar ao jogo uma cara original.</p>
-        <span class="tool">Blender, ilustração, IA generativa</span>
-      </div>
-      <div>
-        <h3>Mexer nas regras</h3>
-        <p>Novos feitiços, itens, tipos de objetivo e uma IA de mestre mais esperta. Cada regra tem teste automático.</p>
-        <span class="tool">GDScript no Godot 4</span>
-      </div>
-      <div>
-        <h3>Fazer um jogo derivado</h3>
-        <p>Pegue o motor e troque o tema: ficção científica, faroeste, terror, o que quiser. As regras e o online vêm prontos.</p>
-        <span class="tool"><a href="https://github.com/MarioTrazzi/heros-quest-simulator/fork">Fork do projeto</a></span>
+  <!-- 5. Chamada final -->
+  <section style="position: relative; padding: 60px clamp(16px, 4vw, 48px) 130px; background: radial-gradient(ellipse 50% 60% at 50% 50%, rgba(255,160,70,0.16), transparent 72%)">
+    <div class="card" style="max-width: 760px; margin: 0 auto; padding: clamp(44px, 6vw, 68px) clamp(28px, 6vw, 72px); text-align: center; display: flex; flex-direction: column; align-items: center; gap: 20px">
+      <svg aria-hidden="true" width="160" height="16" viewBox="0 0 160 16"><path d="M0 8 H66 M94 8 H160" stroke="#7a5a22" stroke-width="1.5" fill="none"></path><path d="M80 1 L87 8 L80 15 L73 8 Z" fill="#7a2016"></path></svg>
+      <h2 style="margin: 0; font-family: 'Fondamento', serif; font-weight: 400; font-size: clamp(44px, 6vw, 68px); line-height: 1; color: #2a1c10"><span data-l="pt">Entre no projeto</span><span data-l="en">Join the project</span></h2>
+      <p style="margin: 0; font-size: 21px; line-height: 1.55; max-width: 44ch"><span data-l="pt">Abra uma issue contando o que você quer fazer: uma quest, um monstro, uma regra ou um jogo inteiro. A resposta vem com um ponto de partida.</span><span data-l="en">Open an issue telling us what you want to make: a quest, a monster, a rule or a whole game. The reply comes with a starting point.</span></p>
+      <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 16px; margin-top: 8px">
+        <a class="btn btn-dark" href="https://github.com/MarioTrazzi/heros-quest-simulator/issues/new?title=Quero%20contribuir" data-pt-href="https://github.com/MarioTrazzi/heros-quest-simulator/issues/new?title=Quero%20contribuir" data-en-href="https://github.com/MarioTrazzi/heros-quest-simulator/issues/new?title=I%20want%20to%20contribute" target="_blank" rel="noopener" data-roll=""><span data-l="pt">Abrir uma issue no GitHub</span><span data-l="en">Open an issue on GitHub</span></a>
+        <a class="btn" href="https://github.com/MarioTrazzi/heros-quest-simulator/fork" target="_blank" rel="noopener"><span data-l="pt">Fazer um fork</span><span data-l="en">Fork it</span></a>
       </div>
     </div>
   </section>
 
-  <section class="block" id="motor">
-    <h2>Por que é fácil derivar</h2>
-    <div class="engine">
-      <dl>
-        <dt>Regras separadas do visual</dt>
-        <dd>O motor de regras não sabe que existe 3D. Dá para trocar toda a arte, ou até fazer uma versão 2D, sem tocar numa regra.</dd>
-        <dt>Tudo é dado</dt>
-        <dd>Heróis, monstros, armas, feitiços, cartas e quests ficam em arquivos JSON. Um jogo novo começa trocando arquivos, não código.</dd>
-        <dt>Uma partida é uma lista de jogadas</dt>
-        <dd>Semente dos dados mais os comandos dos jogadores reconstroem a partida inteira. Isso dá save no meio da quest, replay e multiplayer online de graça.</dd>
-      </dl>
-      <figure style="margin:0">
-<pre><span class="c">// data/quests/cripta_do_relojoeiro.json</span>
-{
-  <span class="k">"id"</span>: <span class="s">"cripta_do_relojoeiro"</span>,
-  <span class="k">"name"</span>: <span class="s">"A Cripta do Relojoeiro"</span>,
-  <span class="k">"start"</span>: [[1, 13]],
-  <span class="k">"objective"</span>: { <span class="k">"type"</span>: <span class="s">"find"</span> },
-  <span class="k">"objects"</span>: [
-    { <span class="k">"type"</span>: <span class="s">"door"</span>, <span class="k">"a"</span>: [4, 2], <span class="k">"b"</span>: [4, 3] },
-    { <span class="k">"type"</span>: <span class="s">"monster"</span>, <span class="k">"id"</span>: <span class="s">"skeleton"</span>, <span class="k">"pos"</span>: [5, 6] },
-    { <span class="k">"type"</span>: <span class="s">"trap"</span>, <span class="k">"id"</span>: <span class="s">"pit"</span>, <span class="k">"pos"</span>: [10, 1], <span class="k">"hidden"</span>: true }
-  ],
-  <span class="k">"wandering_monster"</span>: <span class="s">"skeleton"</span>
-}</pre>
-        <figcaption>Uma quest inteira cabe num arquivo assim.</figcaption>
-      </figure>
-    </div>
-  </section>
-
-  <section class="block">
-    <h2>O que já está pronto</h2>
-    <ol class="road">
-      <li><div><strong>Motor de regras com testes.</strong> <span>Tabuleiro, movimento, linha de visão, dados, combate e turnos.</span></div></li>
-      <li><div><strong>Tabuleiro 3D jogável.</strong> <span>Portas, câmera, clicar para mover, atacar e abrir.</span></div></li>
-      <li><div><strong>Combate e mestre por IA.</strong> <span>Monstros que percebem, perseguem e atacam; dados 3D.</span></div></li>
-      <li><div><strong>Exploração.</strong> <span>Névoa de guerra, busca de tesouros, armadilhas e portas secretas.</span></div></li>
-      <li><div><strong>Magia.</strong> <span>Escolas de feitiços para heróis e magos inimigos.</span></div></li>
-      <li><div><strong>Quests e campanha.</strong> <span>Objetivos, vitória e derrota, armeria, ouro e save entre aventuras.</span></div></li>
-      <li><div><strong>Jogo online.</strong> <span>Salas com senha e servidor próprio para jogar com amigos.</span></div></li>
-      <li><div><strong>Código aberto.</strong> <span>O repositório está público no GitHub.</span></div></li>
-      <li class="todo"><div><strong>Conteúdo original.</strong> <span>Heróis, monstros, arte e quests próprios para o jogo ter identidade. É aqui que você entra.</span></div></li>
-    </ol>
-  </section>
-
-  <section class="join" id="entrar">
-    <div class="box">
-      <div>
-        <h2>Entre no projeto</h2>
-        <p>O código já está aberto no GitHub. Clone, rode no Godot 4.7 e conte numa issue o que você gostaria de fazer: a gente combina por onde começar.</p>
-      </div>
-      <div class="ctas" style="margin-top:0">
-        <a class="btn btn-main js-join" href="#">Quero contribuir</a>
-        <a class="btn btn-ghost" href="https://github.com/MarioTrazzi/heros-quest-simulator">Ver o código no GitHub</a>
+  <!-- 6. Rodapé -->
+  <footer style="position: relative; border-top: 1px solid rgba(168,130,60,0.35); background: rgba(6,5,4,0.7)">
+    <div style="max-width: 1240px; margin: 0 auto; padding: 34px clamp(16px, 4vw, 48px) 40px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 16px 32px">
+      <p style="margin: 0; font-size: 17px; line-height: 1.5; color: #b5a37c; max-width: 62ch"><span data-l="pt">Old Heros é um projeto independente de fã, sem vínculo com nenhuma editora ou marca de jogos. Código sob licença MIT.</span><span data-l="en">Old Heros is an independent fan project, not affiliated with any publisher or game brand. Code under the MIT license.</span></p>
+      <div style="display: flex; flex-wrap: wrap; gap: 4px 24px">
+        <a class="navlink" href="https://github.com/MarioTrazzi/heros-quest-simulator" target="_blank" rel="noopener">GitHub</a>
+        <a class="navlink" href="https://github.com/MarioTrazzi/heros-quest-simulator/issues/new?title=Quero%20contribuir" data-pt-href="https://github.com/MarioTrazzi/heros-quest-simulator/issues/new?title=Quero%20contribuir" data-en-href="https://github.com/MarioTrazzi/heros-quest-simulator/issues/new?title=I%20want%20to%20contribute" target="_blank" rel="noopener"><span data-l="pt">Abrir issue</span><span data-l="en">Open an issue</span></a>
+        <a class="navlink" href="#topo"><span data-l="pt">Voltar ao topo</span><span data-l="en">Back to top</span></a>
       </div>
     </div>
-  </section>
-  </main>
-
-  <footer>
-    <p>Old Heros é um projeto independente de Mario Trazzi. Não tem vínculo com nenhuma editora de jogos. As regras de jogo não são protegidas por direito autoral.</p>
   </footer>
 </div>
-
 <script>
-// Link "Quero contribuir": abre uma issue no GitHub com um modelo.
-(function(){
-  var body = "**O que eu gostaria de fazer:** (quests, arte, regras, jogo derivado, outra coisa)\n\n**Minha experiência:** \n\n**Como prefere ser avisado:** ";
-  var url = "https://github.com/MarioTrazzi/heros-quest-simulator/issues/new?labels=quero-contribuir&title=" +
-    encodeURIComponent("Quero contribuir") + "&body=" + encodeURIComponent(body);
-  document.querySelectorAll(".js-join").forEach(function(a){ a.href = url; a.target = "_blank"; a.rel = "noopener"; });
-})();
-
-// Mini tabuleiro: zonas (0 = corredor, letras = salas), paredes nas arestas entre zonas diferentes.
-(function(){
-  var W = 13, H = 9;
-  var map = [
-    "0000000000000",
-    "0AAA0BBBB0CC0",
-    "0AAA0BBBB0CC0",
-    "0AAA0BBBB0CC0",
-    "0000000000000",
-    "0DDDD0EEE0FF0",
-    "0DDDD0EEE0FF0",
-    "0DDDD0EEE0FF0",
-    "0000000000000"
-  ];
-  // portas: pares de casas vizinhas [x,y,x2,y2]
-  var doors = [[2,3,2,4],[6,3,6,4],[9,2,10,2],[3,5,3,4],[7,5,7,4],[11,5,11,4]];
-  var monsters = [[7,2],[2,6],[11,6]];
-  var chest = [[11,1]];
-  var hero = [0,8];
-  var reach = {};
-  var board = document.getElementById("board");
-  var msg = document.getElementById("msg");
-  function z(x,y){ return map[y][x]; }
-  function key(x,y){ return x+","+y; }
-  function isDoor(a,b,c,d){
-    return doors.some(function(o){ return (o[0]==a&&o[1]==b&&o[2]==c&&o[3]==d)||(o[0]==c&&o[1]==d&&o[2]==a&&o[3]==b); });
-  }
-  function wall(a,b,c,d){ return z(a,b)!==z(c,d) && !isDoor(a,b,c,d); }
-  function has(list,x,y){ return list.some(function(p){ return p[0]==x&&p[1]==y; }); }
-  function bfs(steps){
-    var seen = {}; seen[key(hero[0],hero[1])] = 0;
-    var q = [hero.slice()], out = {};
-    while(q.length){
-      var p = q.shift(), d = seen[key(p[0],p[1])];
-      if(d === steps) continue;
-      [[1,0],[-1,0],[0,1],[0,-1]].forEach(function(v){
-        var nx = p[0]+v[0], ny = p[1]+v[1];
-        if(nx<0||ny<0||nx>=W||ny>=H) return;
-        if(seen[key(nx,ny)] !== undefined) return;
-        if(wall(p[0],p[1],nx,ny)) return;
-        if(has(monsters,nx,ny)||has(chest,nx,ny)) return;
-        seen[key(nx,ny)] = d+1; out[key(nx,ny)] = true; q.push([nx,ny]);
-      });
-    }
-    return out;
-  }
-  function draw(){
-    board.innerHTML = "";
-    for(var y=0;y<H;y++) for(var x=0;x<W;x++){
-      var c = document.createElement(reach[key(x,y)] ? "button" : "div");
-      c.className = "cell" + (z(x,y)!=="0" ? " room" : "");
-      if(y>0 && wall(x,y,x,y-1)) c.className += " wt";
-      if(y<H-1 && wall(x,y,x,y+1)) c.className += " wb";
-      if(x>0 && wall(x,y,x-1,y)) c.className += " wl";
-      if(x<W-1 && wall(x,y,x+1,y)) c.className += " wr";
-      if(reach[key(x,y)]){
-        c.className += " reach"; c.type = "button";
-        c.setAttribute("aria-label","Mover para coluna "+(x+1)+", linha "+(y+1));
-        (function(x,y){ c.addEventListener("click", function(){ move(x,y); }); })(x,y);
-      }
-      c.setAttribute("role","gridcell");
-      if(x===hero[0]&&y===hero[1]){ var t=document.createElement("span"); t.className="tok"; c.appendChild(t); c.setAttribute("aria-label","Herói"); }
-      if(has(monsters,x,y)){ var m=document.createElement("span"); m.className="mon"; c.appendChild(m); c.setAttribute("aria-label","Monstro"); }
-      if(has(chest,x,y)){ var b=document.createElement("span"); b.className="chest"; c.appendChild(b); c.setAttribute("aria-label","Baú"); }
-      board.appendChild(c);
-    }
-  }
-  function move(x,y){
-    hero = [x,y]; reach = {}; draw();
-    var near = [[1,0],[-1,0],[0,1],[0,-1]].some(function(v){
-      var nx=x+v[0], ny=y+v[1];
-      return has(monsters,nx,ny) && !wall(x,y,nx,ny);
+(function () {
+  var root = document.documentElement;
+  var faces = { 1: [4], 2: [0, 8], 3: [0, 4, 8], 4: [0, 2, 6, 8], 5: [0, 2, 4, 6, 8], 6: [0, 2, 3, 5, 6, 8] };
+  var a = 6, b = 5, n = 0;
+  function lang() { return root.getAttribute('data-lang'); }
+  function paint() {
+    var dice = document.querySelectorAll('#dice .die');
+    [a, b].forEach(function (v, d) {
+      dice[d].querySelectorAll('.pip').forEach(function (p, i) { p.classList.toggle('off', faces[v].indexOf(i) < 0); });
     });
-    msg.textContent = near ? "Um monstro ao lado! No jogo, agora você atacaria." : "Pronto. Role de novo para continuar explorando.";
-    document.getElementById("roll").focus();
+    document.getElementById('resultado').textContent = lang() === 'en' ? 'You rolled ' + a + ' and ' + b + '.' : 'Deu ' + a + ' e ' + b + '.';
   }
-  document.getElementById("roll").addEventListener("click", function(){
-    var a = 1+Math.floor(Math.random()*6), b = 1+Math.floor(Math.random()*6);
-    ["d1","d2"].forEach(function(id,i){
-      var el = document.getElementById(id);
-      el.textContent = i ? b : a; el.classList.remove("roll"); void el.offsetWidth; el.classList.add("roll");
+  function setLang(l) {
+    root.setAttribute('data-lang', l);
+    root.lang = l === 'en' ? 'en' : 'pt-BR';
+    document.title = l === 'en' ? 'Old Heros — an open dungeon game' : 'Old Heros — jogo de masmorra aberto';
+    ['href', 'alt', 'aria-label'].forEach(function (attr) {
+      document.querySelectorAll('[data-' + l + '-' + attr + ']').forEach(function (el) { el.setAttribute(attr, el.getAttribute('data-' + l + '-' + attr)); });
     });
-    reach = bfs(a+b); draw();
-    msg.textContent = "Você tirou " + (a+b) + ". Clique numa casa clara para mover.";
-    var first = board.querySelector("button.cell"); if(first) first.focus({preventScroll:true});
+    document.querySelectorAll('[data-set-lang]').forEach(function (btn) {
+      var on = btn.getAttribute('data-set-lang') === l;
+      btn.classList.toggle('on', on);
+      btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+    try { localStorage.setItem('oldheros-lang', l); } catch (e) {}
+    paint();
+  }
+  function roll() {
+    a = 1 + Math.floor(Math.random() * 6);
+    b = 1 + Math.floor(Math.random() * 6);
+    n++;
+    var dice = document.getElementById('dice');
+    dice.classList.remove('rollA', 'rollB');
+    dice.classList.add(n % 2 ? 'rollB' : 'rollA');
+    paint();
+  }
+  document.querySelectorAll('[data-set-lang]').forEach(function (btn) {
+    btn.addEventListener('click', function () { setLang(btn.getAttribute('data-set-lang')); });
   });
-  draw();
+  document.querySelectorAll('[data-roll]').forEach(function (el) { el.addEventListener('click', roll); });
+  var saved = null;
+  try { saved = localStorage.getItem('oldheros-lang'); } catch (e) {}
+  var nav = (navigator.languages && navigator.languages[0]) || navigator.language || 'pt';
+  setLang(saved || (nav.toLowerCase().indexOf('pt') === 0 ? 'pt' : 'en'));
+  document.getElementById('dice').classList.add('rollA');
 })();
 </script>
 </body>
